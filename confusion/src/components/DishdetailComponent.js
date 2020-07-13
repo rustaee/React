@@ -1,8 +1,9 @@
-import React , {useState} from 'react';
+import React , {Component} from 'react';
 import { Card, CardImg, CardText, CardBody, CardTitle, Breadcrumb, BreadcrumbItem, Button, Row, Col, Label, 
     Modal, ModalHeader, ModalBody } from 'reactstrap';
 import { Control, LocalForm, Errors } from 'react-redux-form';
 import { Link } from 'react-router-dom';
+import { Loading } from './LoadingComponent';
 
     const required = (val) => val && val.length;
     const maxLength = (len) => (val) => !(val) || (val.length <= len);
@@ -19,23 +20,37 @@ import { Link } from 'react-router-dom';
             </Card>
         );
     }
-
-    function handleSubmit(values) {
-        alert('Current State is: ' + JSON.stringify(values));
-        //event.preventDefault();
-    }
     
-    function CommentForm(){        
-          const [modal, setModal] = useState(false);        
-          const toggle = () => setModal(!modal);
+    class CommentForm extends Component{       
+        constructor(props) {
+            super(props);
+            this.toggle = this.toggle.bind(this);
+            this.handleSubmit = this.handleSubmit.bind(this);
+            this.state = {
+                isModalOpen: false
+            };
+          }
+    
+          toggle() {
+            this.setState({
+              isModalOpen: !this.state.isModalOpen
+            });
+          }          
 
-        return(
-            <div>
-                <Button outline onClick={toggle} className="btn-sm"><span className="fa fa-pencil"></span> submit comment </Button>
-                <Modal isOpen={modal} toggle={toggle} className="">
-                    <ModalHeader toggle={toggle}>Submit Comment</ModalHeader>
+        handleSubmit(values) {
+            this.toggle();
+            this.props.addComment(this.props.dishId, values.rating, values.author, values.comment);
+        }
+
+        render()
+            {
+            return(
+                <div>
+                <Button outline onClick={this.toggle} className="btn-sm"><span className="fa fa-pencil"></span> submit comment </Button>
+                <Modal isOpen={this.state.isModalOpen} toggle={this.toggle} className="">
+                    <ModalHeader toggle={this.toggle}>Submit Comment</ModalHeader>
                     <ModalBody>
-                    <LocalForm onSubmit={(values) => handleSubmit(values)}>
+                    <LocalForm onSubmit={(values) => this.handleSubmit(values)}>
                             <Row className="form-group">
                                 
                                 <Col sm={12}>
@@ -91,10 +106,13 @@ import { Link } from 'react-router-dom';
                     </ModalBody>
                 </Modal>
             </div>
-        );
+            );
+        }
     }
+  
 
-    function RenderComments({comments}){
+
+    function RenderComments({comments, addComment, dishId}){
         if(comments != null){
             const comment = comments.map((comment) => {
                 return(
@@ -111,7 +129,7 @@ import { Link } from 'react-router-dom';
                     <ul>
                         {comment} 
                     </ul>
-                    <CommentForm /> 
+                    <CommentForm dishId={dishId} addComment={addComment} />
                 </div>                
             );
         }
@@ -120,7 +138,7 @@ import { Link } from 'react-router-dom';
             return(
                 <div>
                     Be the first one who writes a comment!
-                    <CommentForm /> 
+                    <CommentForm dishId={dishId} addComment={addComment} /> 
                 </div>
             );
         }
@@ -129,7 +147,25 @@ import { Link } from 'react-router-dom';
 
     const DishDetail = (props) => {
         const dish =props.dish;
-        if(dish != null) 
+        if (props.isLoading) {
+            return(
+                <div className="container">
+                    <div className="row">            
+                        <Loading />
+                    </div>
+                </div>
+            );
+        }
+        else if (props.errMess) {
+            return(
+                <div className="container">
+                    <div className="row">            
+                        <h4>{props.errMess}</h4>
+                    </div>
+                </div>
+            );
+        }
+        else if (props.dish != null)
             return (
                 <div className="container">
                 <div className="row">
@@ -148,14 +184,13 @@ import { Link } from 'react-router-dom';
                         <RenderDish dish={props.dish} />
                     </div>
                     <div className="col-12 col-md-5 m-1">
-                        <RenderComments comments={props.comments} />
+                    <RenderComments comments={props.comments}
+                        addComment={props.addComment}
+                        dishId={props.dish.id}
+                    />
                     </div>
                 </div>
                 </div>
-            );
-        else
-            return(
-                <div></div>
             );
     }
 
