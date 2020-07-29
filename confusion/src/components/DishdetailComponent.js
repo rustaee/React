@@ -40,7 +40,7 @@ import { baseUrl } from '../shared/baseUrl';
 
         handleSubmit(values) {
             this.toggle();
-            this.props.addComment(this.props.dishId, values.rating, values.author, values.comment);
+            this.props.postComment(this.props.dishId, values.rating, values.author, values.comment);
         }
 
         render()
@@ -69,7 +69,7 @@ import { baseUrl } from '../shared/baseUrl';
                             <Row className="form-group">
                                 <Col sm={12}>
                                     <Label htmlFor="name">Your Name</Label>
-                                    <Control.text model=".name" name="name"
+                                    <Control.text model=".author" name="name"
                                         placeholder="Your Name"
                                         className="form-control"
                                         validators={{
@@ -113,7 +113,7 @@ import { baseUrl } from '../shared/baseUrl';
   
 
 
-    function RenderComments({comments, addComment, dishId}){
+    function RenderComments({comments, postComment, dishId}){
         if(comments != null){
             const comment = comments.map((comment) => {
                 return(
@@ -130,7 +130,7 @@ import { baseUrl } from '../shared/baseUrl';
                     <ul>
                         {comment} 
                     </ul>
-                    <CommentForm dishId={dishId} addComment={addComment} />
+                    <CommentForm dishId={dishId} postComment={postComment} />
                 </div>                
             );
         }
@@ -139,7 +139,7 @@ import { baseUrl } from '../shared/baseUrl';
             return(
                 <div>
                     Be the first one who writes a comment!
-                    <CommentForm dishId={dishId} addComment={addComment} /> 
+                    <CommentForm dishId={dishId} postComment={postComment} /> 
                 </div>
             );
         }
@@ -186,7 +186,7 @@ import { baseUrl } from '../shared/baseUrl';
                     </div>
                     <div className="col-12 col-md-5 m-1">
                     <RenderComments comments={props.comments}
-                        addComment={props.addComment}
+                        postComment={props.postComment}
                         dishId={props.dish.id}
                     />
                     </div>
